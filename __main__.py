@@ -39,7 +39,6 @@ if __name__ == "__main__":
     m1 = comm.bcast(m1, root=0)
     m2 = comm.bcast(m2, root=0)
 
-    comm.Barrier()
     if (rank!=0):
         print(f"process: {rank} \n{m1} \n{m2}")
     strassen(n, m1, m2, product, rank)
