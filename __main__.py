@@ -23,21 +23,21 @@ def matrix_slicer(o):
     return sub_mat
 
 # TODO: confirm if this function is pass-by-reference
-def strassen(n, m1, m2, prod, rank):
+def strassen(o):
     if (n==1):
-        prod[0][0] = m1[0][0] * m2[0][0]
+        o["prod"][0][0] = m1[0][0] * m2[0][0]
 
     # NOTE: // usage might not be correct
     hn = n // 2
 
-    a = matrix_slicer({"n": 4, "matrix": m1, "offset_row": 0, "offset_col": 0, "hn": hn})
-    b = matrix_slicer({"n": 4, "matrix": m1, "offset_row": 0, "offset_col": hn, "hn": hn})
-    c = matrix_slicer({"n": 4, "matrix": m1, "offset_row": hn, "offset_col": 0, "hn": hn})
-    d = matrix_slicer({"n": 4, "matrix": m1, "offset_row": hn, "offset_col": hn, "hn": hn})
-    e = matrix_slicer({"n": 4, "matrix": m2, "offset_row": 0, "offset_col": 0, "hn": hn})
-    f = matrix_slicer({"n": 4, "matrix": m2, "offset_row": 0, "offset_col": hn, "hn": hn})
-    g = matrix_slicer({"n": 4, "matrix": m2, "offset_row": hn, "offset_col": 0, "hn": hn})
-    h = matrix_slicer({"n": 4, "matrix": m2, "offset_row": hn, "offset_col": hn, "hn": hn})
+    a = matrix_slicer({"n": 4, "matrix": o["m1"], "offset_row": 0, "offset_col": 0, "hn": hn})
+    b = matrix_slicer({"n": 4, "matrix": o["m1"], "offset_row": 0, "offset_col": hn, "hn": hn})
+    c = matrix_slicer({"n": 4, "matrix": o["m1"], "offset_row": hn, "offset_col": 0, "hn": hn})
+    d = matrix_slicer({"n": 4, "matrix": o["m1"], "offset_row": hn, "offset_col": hn, "hn": hn})
+    e = matrix_slicer({"n": 4, "matrix": o["m2"], "offset_row": 0, "offset_col": 0, "hn": hn})
+    f = matrix_slicer({"n": 4, "matrix": o["m2"], "offset_row": 0, "offset_col": hn, "hn": hn})
+    g = matrix_slicer({"n": 4, "matrix": o["m2"], "offset_row": hn, "offset_col": 0, "hn": hn})
+    h = matrix_slicer({"n": 4, "matrix": o["m2"], "offset_row": hn, "offset_col": hn, "hn": hn})
 
 if __name__ == "__main__":
     n = 0
@@ -59,4 +59,4 @@ if __name__ == "__main__":
 
     if (rank!=0):
         print(f"process: {rank} \n{m1} \n{m2}")
-    strassen(n, m1, m2, product, rank)
+    strassen({"n": n, "m1": m1, "m2": m2, "prod": product, "rank": rank})
