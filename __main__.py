@@ -37,12 +37,12 @@ def strassen(x, y):
 
 
 if __name__ == "__main__":
-    n = 50
+    n = 0
     print("Size for the (n x n) matrix? ")
     try:
         n = int(input())
-        if n % 2 != 0:
-            print("Size must be even for Strassen's algorithm. Please enter an even number.")
+        if n % 2 != 0 or not (n & (n - 1) == 0):
+            print("Size must be even and of a power of 2 for Strassen's algorithm. Please enter another number.")
             exit(1)
         m1 = matrix_randomizer(n)
         m2 = matrix_randomizer(n)
