@@ -1,7 +1,10 @@
 # To start
-* make sure to install beforehand `pipenv`
+Make sure to install beforehand `pipenv`
+
 `$ python3 -m venv .venv`
+
 `$ source .venv/bin/activate` or `./venv/Scripts/activate.ps1`
+
 `$ pipenv install`
 
 # To execute, type
