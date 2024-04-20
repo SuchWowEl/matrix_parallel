@@ -14,12 +14,30 @@ def matrix_randomizer(n):
     print(f"matrix: {matrix}")
     return matrix
 
+# TODO: Confirm if this function is pass-by-reference.
+#  It becomes like that when you apparently pass a list to it.
+def matrix_slicer(o):
+    # m = n // 2
+    sub_mat = [[o["matrix"][o["offset_row"] + i][o["offset_col"] + j] for j in range(o["hn"])] for i in range(o["hn"])]
+    print(f"{o['offset_row']}{o['offset_col']}: {sub_mat}")
+    return sub_mat
+
+# TODO: confirm if this function is pass-by-reference
 def strassen(n, m1, m2, prod, rank):
     if (n==1):
         prod[0][0] = m1[0][0] * m2[0][0]
 
-    # TODO: check if // usage is correct
-    h = n // 2
+    # NOTE: // usage might not be correct
+    hn = n // 2
+
+    a = matrix_slicer({"n": 4, "matrix": m1, "offset_row": 0, "offset_col": 0, "hn": hn})
+    b = matrix_slicer({"n": 4, "matrix": m1, "offset_row": 0, "offset_col": hn, "hn": hn})
+    c = matrix_slicer({"n": 4, "matrix": m1, "offset_row": hn, "offset_col": 0, "hn": hn})
+    d = matrix_slicer({"n": 4, "matrix": m1, "offset_row": hn, "offset_col": hn, "hn": hn})
+    e = matrix_slicer({"n": 4, "matrix": m2, "offset_row": 0, "offset_col": 0, "hn": hn})
+    f = matrix_slicer({"n": 4, "matrix": m2, "offset_row": 0, "offset_col": hn, "hn": hn})
+    g = matrix_slicer({"n": 4, "matrix": m2, "offset_row": hn, "offset_col": 0, "hn": hn})
+    h = matrix_slicer({"n": 4, "matrix": m2, "offset_row": hn, "offset_col": hn, "hn": hn})
 
 if __name__ == "__main__":
     n = 0
