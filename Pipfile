@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 mpi4py = "*"
+numpy = "*"
 
 [dev-packages]
 
