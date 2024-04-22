@@ -39,7 +39,7 @@ def mini_strassen(mat1, mat2):
 
     return c
 
-def strassen(n, m1, m2, rank):
+def strassen(m1, m2, rank):
     if len(m1) == 1:
         return m1 * m2
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     m2 = comm.bcast(m2, root=0)
 
     # result = main_strassen(m1, m2)
-    result = strassen(n, m1, m2, rank, 0)
+    result = strassen(m1, m2, rank)
 
     if (rank == 0):
         print(f"Output: {result}")
