@@ -1,9 +1,10 @@
 from mpi4py import MPI
 import numpy as np
-import random
+import time
 
 comm = MPI.COMM_WORLD
 rank = comm.rank
+size = comm.size
 
 def matrix_randomizer(n):
     matrix = np.random.randint(0, 11, size=(n, n))
@@ -15,87 +16,64 @@ def split(matrix):
     row2, col2 = row//2, col//2
     return matrix[:row2, :col2], matrix[:row2, col2:], matrix[row2:, :col2], matrix[row2:, col2:]
 
-def mini_strassen(mat1, mat2):
-    if len(mat1) == 1:
-        return mat1 * mat2
+def naive(mat1, mat2):
+    # Allocate matrix for product
+    prod = [[0 for _ in range(len(mat1))] for _ in range(len(mat1))]
 
-    a, b, c, d = split(mat1)
-    e, f, g, h = split(mat2)
+    # Perform matrix multiplication
+    for i in range(len(mat1)):
+        for j in range(len(mat1)):
+            for k in range(len(mat1)):
+                prod[i][j] += mat1[i][k] * mat2[k][j]
 
-    p1 = mini_strassen(a, f - h) 
-    p2 = mini_strassen(a + b, h)     
-    p3 = mini_strassen(c + d, e)     
-    p4 = mini_strassen(d, g - e)     
-    p5 = mini_strassen(a + d, e + h)     
-    p6 = mini_strassen(b - d, g + h) 
-    p7 = mini_strassen(a - c, e + f) 
+    return np.vstack(prod)
 
-    c11 = p5 + p4 - p2 + p6 
-    c12 = p1 + p2         
-    c21 = p3 + p4         
-    c22 = p1 + p5 - p3 - p7 
-
-    c = np.vstack((np.hstack((c11, c12)), np.hstack((c21, c22)))) 
-
-    return c
-
-def strassen(m1, m2, rank):
+def strassen_scatter(m1, m2):
     if len(m1) == 1:
         return m1 * m2
 
     a, b, c, d = split(m1)
     e, f, g, h = split(m2)
 
-    p1 = p2 = p3 = p4 = p5 = p6 = p7 = []
+    return ((a, f - h), (a + b, h), (c + d, e), (d, g - e), (a + d, e + h), (b - d, g + h), (a - c, e + f))
 
-    if (rank==0):
-        p1 = comm.recv(source=1,tag=1)
-        p2 = comm.recv(source=2,tag=2)
-        p3 = comm.recv(source=3,tag=3)
-        p4 = comm.recv(source=4,tag=4)
-        p5 = comm.recv(source=5,tag=5)
-        p6 = comm.recv(source=6,tag=6)
-        p7 = comm.recv(source=7,tag=7)
+def strassen_gather(p1, p2, p3, p4, p5, p6, p7):
+    c11 = p5 + p4 - p2 + p6
+    c12 = p1 + p2
+    c21 = p3 + p4
+    c22 = p1 + p5 - p3 - p7
 
-    if (rank==1):
-        p1 = mini_strassen(a, f - h)
-        comm.send(p1,0,rank)
-    if (rank==2):
-        p2 = mini_strassen(a + b, h)
-        comm.send(p2,0,rank)
-    if (rank==3):
-        p3 = mini_strassen(c + d, e)
-        comm.send(p3,0,rank)
-    if (rank==4):
-        p4 = mini_strassen(d, g - e)
-        comm.send(p4,0,rank)
-    if (rank==5):
-        p5 = mini_strassen(a + d, e + h)
-        comm.send(p5,0,rank)
-    if (rank==6):
-        p6 = mini_strassen(b - d, g + h)
-        comm.send(p6,0,rank)
-    if (rank==7):
-        p7 = mini_strassen(a - c, e + f)
-        comm.send(p7,0,rank)
+    return np.vstack((np.hstack((c11, c12)), np.hstack((c21, c22))))
 
-    comm.barrier()
+def strassen(m1, m2):
+    if (n <= 32):
+        return naive(m1, m2)
+    # if len(m1) == 1:
+    #     return m1 * m2
 
-    if (rank==0):
-        c11 = p5 + p4 - p2 + p6
-        c12 = p1 + p2
-        c21 = p3 + p4
-        c22 = p1 + p5 - p3 - p7
+    a, b, c, d = split(m1)
+    e, f, g, h = split(m2)
 
-        c = np.vstack((np.hstack((c11, c12)), np.hstack((c21, c22)))) 
-        return c
+    p1 = strassen(a, f - h)
+    p2 = strassen(a + b, h)
+    p3 = strassen(c + d, e)
+    p4 = strassen(d, g - e)
+    p5 = strassen(a + d, e + h)
+    p6 = strassen(b - d, g + h)
+    p7 = strassen(a - c, e + f)
 
+    c11 = p5 + p4 - p2 + p6
+    c12 = p1 + p2
+    c21 = p3 + p4
+    c22 = p1 + p5 - p3 - p7
+
+    return np.vstack((np.hstack((c11, c12)), np.hstack((c21, c22))))
 
 if __name__ == "__main__":
     n = 0
     m1 = m2 = []
-    product = []
-    if (rank == 0):
+
+    if rank == 0:
         try:
             print("Size for the (n x n) matrix? ")
             n = int(input())
@@ -104,18 +82,35 @@ if __name__ == "__main__":
                 exit(1)
             m1 = matrix_randomizer(n)
             m2 = matrix_randomizer(n)
-            print(f"n = {n}")
         except ValueError:
             print("Input not integer, please repeat")
             exit(1)
 
-    m1 = comm.bcast(m1, root=0)
-    m2 = comm.bcast(m2, root=0)
 
-    # result = main_strassen(m1, m2)
-    result = strassen(m1, m2, rank)
+    if rank == 0:
+        workloads = strassen_scatter(m1, m2)
+        for i in range(len(workloads)):
+            comm.send((workloads[i][0],workloads[i][1]), i+1, i+1)
+        print("1st send")
 
-    if (rank == 0):
-        print(f"Output: {result}")
+    else:
+        sub_matrix = comm.recv(source=0,tag=rank)
+        sub_result = strassen(*sub_matrix)
+        comm.send(sub_result, 0, rank)
+        print("over barrier")
 
+    # comm.barrier()
+
+    t1 = time.time()
+    p1 = comm.recv(source=1,tag=1)
+    p2 = comm.recv(source=2,tag=2)
+    p3 = comm.recv(source=3,tag=3)
+    p4 = comm.recv(source=4,tag=4)
+    p5 = comm.recv(source=5,tag=5)
+    p6 = comm.recv(source=6,tag=6)
+    p7 = comm.recv(source=7,tag=7)
+    gathered_results = (p1,p2,p3,p4,p5,p6,p7)
+    t2 = time.time()
+
+    print("Time: ", t2-t1)
 
