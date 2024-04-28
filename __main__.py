@@ -87,6 +87,7 @@ if __name__ == "__main__":
             exit(1)
 
 
+    t1 = time.time()
     if rank == 0:
         workloads = strassen_scatter(m1, m2)
         for i in range(len(workloads)):
@@ -101,7 +102,6 @@ if __name__ == "__main__":
 
     # comm.barrier()
 
-    t1 = time.time()
     p1 = comm.recv(source=1,tag=1)
     p2 = comm.recv(source=2,tag=2)
     p3 = comm.recv(source=3,tag=3)
