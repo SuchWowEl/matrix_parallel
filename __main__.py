@@ -102,6 +102,7 @@ if __name__ == "__main__":
     p6 = comm.recv(source=6,tag=6)
     p7 = comm.recv(source=7,tag=7)
     gathered_results = (p1,p2,p3,p4,p5,p6,p7)
+    print(strassen_gather(*gathered_results))
     t2 = time.time()
 
     print("Time: ", t2-t1)
