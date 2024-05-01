@@ -18,15 +18,7 @@ def split(matrix):
 
 def naive(mat1, mat2):
     # Allocate matrix for product
-    prod = [[0 for _ in range(len(mat1))] for _ in range(len(mat1))]
-
-    # Perform matrix multiplication
-    for i in range(len(mat1)):
-        for j in range(len(mat1)):
-            for k in range(len(mat1)):
-                prod[i][j] += mat1[i][k] * mat2[k][j]
-
-    return np.vstack(prod)
+    return mat1 @ mat2
 
 def strassen_scatter(m1, m2):
     if len(m1) == 1:
