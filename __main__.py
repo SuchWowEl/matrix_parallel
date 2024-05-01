@@ -72,6 +72,8 @@ if __name__ == "__main__":
             if n % 2 != 0 or not (n & (n - 1) == 0):
                 print("Size must be even and of a power of 2 for Strassen's algorithm. Please enter another number.")
                 exit(1)
+            else:
+                print(f"n = {n}")
             m1 = matrix_randomizer(n)
             m2 = matrix_randomizer(n)
         except ValueError:
