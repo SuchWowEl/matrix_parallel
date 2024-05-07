@@ -17,18 +17,22 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
     size = comm.Get_size()
 
     if rank == 0:
-        # Check if the matrices have compatible dimensions
-        if A.shape[1] != B.shape[0]:
-            raise ValueError("Matrices must be of compatible dimensions for multiplication")
+        matrix_size = 65536
+        A = np.random.randint(10, size=(matrix_size, matrix_size), dtype=np.int32)
+        B = np.random.randint(10, size=(matrix_size, matrix_size), dtype=np.int32)
+    else:
+        A = None
+        B = None
 
     # Broadcast the shape of matrices to all processes
     A_shape = np.empty(2, dtype=np.int32)
     B_shape = np.empty(2, dtype=np.int32)
-    comm.Bcast([A.shape, MPI.INT32_T], root=0)
-    comm.Bcast([B.shape, MPI.INT32_T], root=0)
+    comm.Bcast([A_shape, MPI.INT32_T], root=0)
+    comm.Bcast([B_shape, MPI.INT32_T], root=0)
 
-    if A.shape[1] != B.shape[0]:
+    if A_shape[1] != B_shape[0]:
         raise ValueError("Matrices must be of compatible dimensions for multiplication")
+
 
     # Divide work along the rows of matrices
     rows_per_process = A_shape[0] // size
