@@ -27,5 +27,18 @@ if __name__ == "__main__":
     else:
         m2[rank-4] = populate_matrices(matrix_size, rank)
 
-    print(f"M1 is: {m1}")
-    print(f"M2 is: {m2}")
+    comm.Barrier()  # Synchronize all processes
+
+    # Gather matrices to process 0
+    all_m1 = comm.gather(m1, root=0)
+    all_m2 = comm.gather(m2, root=0)
+
+    # Print the matrices
+    if rank == 0:
+        for i in range(2):
+            print("M1:", all_m1[i])
+            print("M2:", all_m2[i])
+        print()
+        for i in range(2, 4):
+            print("M1:", all_m1[i])
+            print("M2:", all_m2[i])
