@@ -52,7 +52,7 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
 
     # Populate matrices A and B in parallel
     populate_matrices(A, B, comm)
-
+    """"
     # Divide work along the rows of matrices
     rows_per_process = A_shape[0] // size
     start_row = rank * rows_per_process
@@ -100,9 +100,9 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
         result = np.empty((A_shape[0], B_shape[1]), dtype=np.int32)
     else:
         result = None
-    comm.Gather([local_C, MPI.INT32_T], [result, MPI.INT32_T], root=0)
+    comm.Gather([local_C, MPI.INT32_T], [result, MPI.INT32_T], root=0)"""
 
-    return result
+    return
 
 # Example usage:
 if __name__ == "__main__":
@@ -119,4 +119,5 @@ if __name__ == "__main__":
 
     result = matrix_multiply_divide_and_conquer(A, B, comm)
     if rank == 0:
-        print(result)
+        print(A)
+        print(B)
