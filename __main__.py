@@ -21,10 +21,10 @@ def populate_matrices(A, B, comm):
     row_end = row_start + submatrix_size
 
     # Populate matrix A
-    A[row_start:row_end, :] = np.random.randint(10, size=(submatrix_size, matrix_size))
+    A[row_start:row_end, :] = np.random.randint(0, 11, size=(submatrix_size, matrix_size))
 
     # Populate matrix B
-    B[row_start:row_end, :] = np.random.randint(10, size=(submatrix_size, matrix_size))
+    B[row_start:row_end, :] = np.random.randint(0, 11, size=(submatrix_size, matrix_size))
 
 def matrix_multiply_divide_and_conquer(A, B, comm):
     """
@@ -53,7 +53,7 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
         B_shape = np.empty(2)
 
     # Broadcast the shape of matrices to all processes
-    comm.Bcast(A_shape, MPI.INT32_T, root=0)
+    comm.Bcast(A_shape, root=0)
     comm.Bcast(B_shape, root=0)
 
     print(f"Process {rank}: Shape of A: {A_shape}, Shape of B: {B_shape}")  # Print shapes of A and B
@@ -75,4 +75,6 @@ if __name__ == "__main__":
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
 
-    result = matrix_multiply_divide_and_conquer(A, B, comm)
+    m1 = m2 = []
+
+    result = matrix_multiply_divide_and_conquer(m1, m2, comm)
