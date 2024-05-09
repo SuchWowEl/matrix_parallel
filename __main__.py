@@ -47,8 +47,11 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
     comm.Bcast([A_shape, MPI.INT32_T], root=0)
     comm.Bcast([B_shape, MPI.INT32_T], root=0)
 
+    print(f"Process {rank}: Shape of A: {A_shape}, Shape of B: {B_shape}")  # Print shapes of A and B
+
     if A_shape[1] != B_shape[0]:
         raise ValueError("Matrices must be of compatible dimensions for multiplication")
+
 
     # Print the shapes of A and B after broadcasting
     print(f"Process {rank}: Shape of A: {A_shape}, Shape of B: {B_shape}")
@@ -67,12 +70,8 @@ if __name__ == "__main__":
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
 
-    if rank == 0:
-        matrix_size = 4
-        A = np.empty((matrix_size, matrix_size), dtype=np.int32)
-        B = np.empty((matrix_size, matrix_size), dtype=np.int32)
-    else:
-        A = None
-        B = None
+    matrix_size = 4
+    A = np.empty((matrix_size, matrix_size), dtype=np.int32)
+    B = np.empty((matrix_size, matrix_size), dtype=np.int32)
 
     result = matrix_multiply_divide_and_conquer(A, B, comm)
