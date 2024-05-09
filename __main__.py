@@ -53,8 +53,8 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
         B_shape = np.empty(2)
 
     # Broadcast the shape of matrices to all processes
-    comm.Bcast([A_shape, MPI.INT32_T], root=0)
-    comm.Bcast([B_shape, MPI.INT32_T], root=0)
+    comm.Bcast(A_shape, MPI.INT32_T, root=0)
+    comm.Bcast(B_shape, root=0)
 
     print(f"Process {rank}: Shape of A: {A_shape}, Shape of B: {B_shape}")  # Print shapes of A and B
 
@@ -74,13 +74,5 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
 if __name__ == "__main__":
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
-
-    matrix_size = 4
-    A = np.empty([matrix_size, matrix_size])
-    B = np.empty([matrix_size, matrix_size])
-
-    # Print the populated matrices A and B
-    print(f"Process {rank}: Matrix A:\n{A}")
-    print(f"Process {rank}: Matrix B:\n{B}")
 
     result = matrix_multiply_divide_and_conquer(A, B, comm)
