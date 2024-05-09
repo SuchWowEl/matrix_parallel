@@ -21,10 +21,10 @@ def populate_matrices(A, B, comm):
     row_end = row_start + submatrix_size
 
     # Populate matrix A
-    A[row_start:row_end, :] = np.random.randint(10, size=(submatrix_size, matrix_size), dtype=np.int32)
+    A[row_start:row_end, :] = np.random.randint(10, size=(submatrix_size, matrix_size))
 
     # Populate matrix B
-    B[:, row_start:row_end] = np.random.randint(10, size=(matrix_size, submatrix_size), dtype=np.int32)
+    B[row_start:row_end, :] = np.random.randint(10, size=(submatrix_size, matrix_size))
 
 def matrix_multiply_divide_and_conquer(A, B, comm):
     """
@@ -44,13 +44,13 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
     # Initialize the shape information in the root process
     if rank == 0:
         matrix_size = 4
-        A = np.empty((matrix_size, matrix_size), dtype=np.int32)
-        B = np.empty((matrix_size, matrix_size), dtype=np.int32)
-        A_shape = np.array(A.shape, dtype=np.int32)
-        B_shape = np.array(B.shape, dtype=np.int32)
+        A = np.empty((matrix_size, matrix_size))
+        B = np.empty((matrix_size, matrix_size))
+        A_shape = np.array(A.shape)
+        B_shape = np.array(B.shape)
     else:
-        A_shape = np.empty(2, dtype=np.int32)
-        B_shape = np.empty(2, dtype=np.int32)
+        A_shape = np.empty(2)
+        B_shape = np.empty(2)
 
     # Broadcast the shape of matrices to all processes
     comm.Bcast([A_shape, MPI.INT32_T], root=0)
@@ -60,10 +60,6 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
 
     if A_shape[1] != B_shape[0]:
         raise ValueError("Matrices must be of compatible dimensions for multiplication")
-
-
-    # Print the shapes of A and B after broadcasting
-    print(f"Process {rank}: Shape of A: {A_shape}, Shape of B: {B_shape}")
 
     # Populate matrices A and B in parallel
     populate_matrices(A, B, comm)
@@ -80,8 +76,8 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
 
     matrix_size = 4
-    A = np.empty((matrix_size, matrix_size), dtype=np.int32)
-    B = np.empty((matrix_size, matrix_size), dtype=np.int32)
+    A = np.empty((matrix_size, matrix_size))
+    B = np.empty((matrix_size, matrix_size))
 
     # Print the populated matrices A and B
     print(f"Process {rank}: Matrix A:\n{A}")
