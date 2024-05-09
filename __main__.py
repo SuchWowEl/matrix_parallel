@@ -1,13 +1,13 @@
 from mpi4py import MPI
 import numpy as np
 
-def populate_matrices(matrix_size):
-    size = matrix_size / 4
+def populate_matrices(matrix_size, rank):
+    size = matrix_size // 4
     
     # Populate matrix A
     matrix = np.random.randint(0, 11, size=(size, size))
 
-    print(matrix)
+    print(f"This is process {rank}, my matrix is: {matrix}")
 
     return matrix
 
@@ -19,16 +19,13 @@ if __name__ == "__main__":
     size = comm.Get_size()
 
     matrix_size = 16
-    m1 = m2 = []
+    m1 = [[] for _ in range(4)]
+    m2 = [[] for _ in range(4)]
 
-    for i in size:
-        if rank < 4:
-            m1[rank] = populate_matrices(matrix_size)
-        else:
-            m2[rank] = populate_matrices(matrix_size)
+    if rank < 4:
+        m1[rank] = populate_matrices(matrix_size, rank)
+    else:
+        m2[rank-4] = populate_matrices(matrix_size, rank)
 
     print(f"M1 is: {m1}")
     print(f"M2 is: {m2}")
-
-    
-
