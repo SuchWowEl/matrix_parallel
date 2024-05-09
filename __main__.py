@@ -44,8 +44,8 @@ def matrix_multiply_divide_and_conquer(A, B, comm):
     # Initialize the shape information in the root process
     if rank == 0:
         matrix_size = 4
-        A = np.empty((matrix_size, matrix_size))
-        B = np.empty((matrix_size, matrix_size))
+        A = np.empty([matrix_size, matrix_size])
+        B = np.empty([matrix_size, matrix_size])
         A_shape = np.array(A.shape)
         B_shape = np.array(B.shape)
     else:
@@ -76,8 +76,8 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
 
     matrix_size = 4
-    A = np.empty((matrix_size, matrix_size))
-    B = np.empty((matrix_size, matrix_size))
+    A = np.empty([matrix_size, matrix_size])
+    B = np.empty([matrix_size, matrix_size])
 
     # Print the populated matrices A and B
     print(f"Process {rank}: Matrix A:\n{A}")
