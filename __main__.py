@@ -28,7 +28,7 @@ def naive(c_mat, a_mat, b_mat):
     n = a_mat.shape[0]
     for i in range(n):
         for j in range(n):
-            # c_mat[i][j] = 0
+            c_mat[i][j] = 0
             for k in range(n):
                 # if rank == 1:
                 #     print(f"i: {i}, j: {j}, k: {k}")
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    matrix_size = 512
+    matrix_size = 8
     comp = []
 
     tb = 0
