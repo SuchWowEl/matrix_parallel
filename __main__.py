@@ -42,6 +42,9 @@ def distribute_workload(comm, matrix_size):
 
     comm.Barrier()  # Synchronize all processes
 
+    print(f"This is process {rank}, my local_comp is: {local_comp}")
+    print(f"This is process {rank}, while my comp is: {comp}")
+
     # Perform matrix multiplication
     temp = np.zeros((mat_size, mat_size))
     c_sub = np.zeros((mat_size, mat_size))
