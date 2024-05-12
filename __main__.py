@@ -17,8 +17,15 @@ def c_submatrix_solver(c_m, a_1, b_1, a_2, b_2, temp):
     np.matmul(a_1, b_1, out=temp)
     np.matmul(a_2, b_2, out=c_m)
 
+    print("After multiplication:")
+    print(c_m)
+
     # Add
     c_m += temp
+
+    print("After addition:")
+    print(c_m)
+
 
 def distribute_workload(comm, matrix_size):
     rank = comm.Get_rank()
