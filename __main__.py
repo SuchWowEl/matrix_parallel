@@ -20,15 +20,12 @@ def c_submatrix_solver(c_m, a_1, b_1, a_2, b_2, temp):
     divide_n_conquer(temp, a_2, b_2)
 
     # Add
-    # size = a_m.shape[0]
     for x in range(a_1.shape[0]):
         for y in range(a_1.shape[0]):
             c_m[x,y] += temp[x,y]
 
 def naive(c_mat, a_mat, b_mat):
     n = a_mat.shape[0]
-    # if rank == 1:
-    #     print(f"naive n: {n}")
     for i in range(n):
         for j in range(n):
             # c_mat[i][j] = 0
@@ -72,7 +69,7 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    matrix_size = 256
+    matrix_size = 512
     comp = []
 
     tb = 0
@@ -90,8 +87,6 @@ if __name__ == "__main__":
 
     # Print the matrices
     if rank == 0:
-        c_matrix = np.zeros([matrix_size, matrix_size])
-        print(c_matrix)
         print("BEFORE !!!!!!!!!!!!!!!!!!")
         print(f"M1.1: [ {all_matrices[0]} , {all_matrices[1]} ")
         print()
@@ -106,30 +101,28 @@ if __name__ == "__main__":
         # return mat[:half, :half], mat[:half, half:], mat[half:, :half], mat[half:, half:]
         t1 = time.time()
         half = all_matrices[0].shape[0]
-        comm.send([c_matrix[:half, :half], all_matrices[0], all_matrices[4], all_matrices[1], all_matrices[6]], 1, 1)
-        comm.send([c_matrix[:half, half:], all_matrices[0], all_matrices[5], all_matrices[1], all_matrices[7]], 2, 2)
-        comm.send([c_matrix[half:, :half], all_matrices[2], all_matrices[4], all_matrices[3], all_matrices[6]], 3, 3)
-        comm.send([c_matrix[half:, half:], all_matrices[2], all_matrices[5], all_matrices[3], all_matrices[7]], 4, 4)
-        comm.recv(source=1,tag=6)
-        comm.recv(source=2,tag=7)
-        comm.recv(source=3,tag=8)
-        comm.recv(source=4,tag=9)
+        comm.send([all_matrices[0], all_matrices[4], all_matrices[1], all_matrices[6]], 1, 1)
+        comm.send([all_matrices[0], all_matrices[5], all_matrices[1], all_matrices[7]], 2, 2)
+        comm.send([all_matrices[2], all_matrices[4], all_matrices[3], all_matrices[6]], 3, 3)
+        comm.send([all_matrices[2], all_matrices[5], all_matrices[3], all_matrices[7]], 4, 4)
+        res1 = comm.recv(source=1,tag=6)
+        res2 = comm.recv(source=2,tag=7)
+        res3 = comm.recv(source=3,tag=8)
+        res4 = comm.recv(source=4,tag=9)
         t2 = time.time()
 
         print(f"time elapsed: {t2-t1}")
 
-        # print("AFTER !!!!!!!!!!!!!!!!!!")
-        # print(f"M1.1: [ {all_matrices[0]} , {all_matrices[1]} ")
-        # print()
-        # print(f"M1.2: [ {all_matrices[2]} , {all_matrices[3]} ")
-        # print()
-        # print()
-        # print(f"M2.1: [ {all_matrices[4]} , {all_matrices[5]} ")
-        # print()
-        # print(f"M2.2: [ {all_matrices[6]} , {all_matrices[7]} ")
+        print("AFTER !!!!!!!!!!!!!!!!!!")
+        print(f"M1.1: [ {res1} , {res2} ")
+        print()
+        print(f"M1.2: [ {res3} , {res4} ")
     elif rank >= 1 and rank <= 4:
         workloads = comm.recv(source=0,tag=rank)
         # matrix_size = matrix_size // 2
-        temp = np.zeros([workloads[0].shape[0], workloads[0].shape[0]])
-        c_submatrix_solver(workloads[0], workloads[1], workloads[2], workloads[3], workloads[4], temp)
-        comm.send(True,0,rank+5)
+        temp = np.zeros([workloads[1].shape[0], workloads[1].shape[0]]) #[[0]*workloads[0].shape[0]]*workloads[0].shape[0] 
+        c_sub = np.zeros([workloads[1].shape[0], workloads[1].shape[0]])
+        # print(f"temp: {temp}")
+        c_submatrix_solver(c_sub, workloads[0], workloads[1], workloads[2], workloads[3], temp)
+        print(f"temp outside: {c_sub}")
+        comm.send(c_sub,0,rank+5)
