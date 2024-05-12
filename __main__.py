@@ -37,7 +37,8 @@ def distribute_workload(comm, matrix_size):
     # Generate and scatter matrices
     mat_size = matrix_size // 2
     comp = populate_matrices(matrix_size, rank)
-    local_comp = np.zeros((mat_size, mat_size))
+    local_comp = np.zeros((mat_size, mat_size), dtype=int)
+
     comm.Scatter(comp, local_comp, root=0)
 
     comm.Barrier()  # Synchronize all processes
@@ -46,8 +47,8 @@ def distribute_workload(comm, matrix_size):
     print(f"This is process {rank}, while my comp is: {comp}")
 
     # Perform matrix multiplication
-    temp = np.zeros((mat_size, mat_size))
-    c_sub = np.zeros((mat_size, mat_size))
+    temp = np.zeros((mat_size, mat_size), dtype=int)
+    c_sub = np.zeros((mat_size, mat_size), dtype=int)
     c_submatrix_solver(c_sub, local_comp[0], local_comp[1], local_comp[2], local_comp[3], temp)
 
     # Gather results
