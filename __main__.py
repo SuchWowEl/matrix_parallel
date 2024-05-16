@@ -38,7 +38,7 @@ def strassen_gather(p1, p2, p3, p4, p5, p6, p7):
     return np.vstack((np.hstack((c11, c12)), np.hstack((c21, c22))))
 
 def strassen(m1, m2):
-    if (n <= 1):
+    if (m1.size <= 32):
         return naive(m1, m2)
     # if len(m1) == 1:
     #     return m1 * m2
@@ -46,13 +46,13 @@ def strassen(m1, m2):
     a, b, c, d = split(m1)
     e, f, g, h = split(m2)
 
-    p1 = strassen(a, f - h)
-    p2 = strassen(a + b, h)
-    p3 = strassen(c + d, e)
+    p1 = strassen(a + d, e + h)
+    p2 = strassen(c + d, e)
+    p3 = strassen(a, f - h)
     p4 = strassen(d, g - e)
-    p5 = strassen(a + d, e + h)
-    p6 = strassen(b - d, g + h)
-    p7 = strassen(a - c, e + f)
+    p5 = strassen(a + b, h)
+    p6 = strassen(c - a, e + f)
+    p7 = strassen(b - d, g + h)
 
     c11 = p5 + p4 - p2 + p6
     c12 = p1 + p2
