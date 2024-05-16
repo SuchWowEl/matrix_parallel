@@ -210,13 +210,13 @@ void strassenMPI(int n, int** mat1, int** mat2, int**& prod, int rank, int numPr
     int** g = getSlice(n, mat2, m, 0);
     int** h = getSlice(n, mat2, m, m);
 
-    int** p1;
-    int** p2;
-    int** p3;
-    int** p4;
-    int** p5;
-    int** p6;
-    int** p7;
+    int** p1 = allocateMatrix(m);
+    int** p2 = allocateMatrix(m);
+    int** p3 = allocateMatrix(m);
+    int** p4 = allocateMatrix(m);
+    int** p5 = allocateMatrix(m);
+    int** p6 = allocateMatrix(m);
+    int** p7 = allocateMatrix(m);
 
     if (rank == 0)
     {
