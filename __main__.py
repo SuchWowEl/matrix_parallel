@@ -69,7 +69,16 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    matrix_size = 8
+    # matrix_size = 16 # 0.00397801399230957
+    # matrix_size = 32 # 0.02890491485595703
+    # matrix_size = 64 # 0.17362570762634277
+    # matrix_size = 128 # 1.2322485446929932
+    # matrix_size = 256 # 10.044433355331421
+    # matrix_size = 512 # 89.28690814971924
+    # matrix_size = 1024 # 700.2976865768433
+    # matrix_size = 2048 # ???
+    matrix_size = 256
+    print(f"matrix_size: {matrix_size}")
     comp = []
 
     tb = 0
