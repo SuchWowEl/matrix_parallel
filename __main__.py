@@ -49,7 +49,7 @@ def startitall(localmat, mat_size, rank, comm):
         temp = multi(temp, localmat)
     comm.Barrier()
 
-
+    print(f"\n\nThis is process {rank}, and my multi result is: {temp}")
 
     # Phase 2: Combine partial results from the previous step
     phase_2_pairs = {
