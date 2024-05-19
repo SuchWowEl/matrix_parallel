@@ -21,11 +21,11 @@ def startitall(localmat, mat_size, rank, comm):
     send_recv_pairs = {
         0: [4, 5],  # Process 0 receives from 4 and sends to 5
         1: [6, 7],  # Process 1 receives from 6 and sends to 7
-        2: [4, 5],  # Process 2 receives from 4 and sends to 5
-        3: [6, 7],  # Process 3 receives from 6 and sends to 7
-        4: [0, 2],  # Process 4 receives from 0 and sends to 2
+        2: [5, 4],  # Process 2 receives from 5 and sends to 4
+        3: [7, 6],  # Process 3 receives from 7 and sends to 6
+        4: [2, 0],  # Process 4 receives from 2 and sends to 0
         5: [0, 2],  # Process 5 receives from 0 and sends to 2
-        6: [1, 3],  # Process 6 receives from 1 and sends to 3
+        6: [3, 1],  # Process 6 receives from 3 and sends to 1
         7: [1, 3]   # Process 7 receives from 1 and sends to 3
     }
 
