@@ -98,15 +98,15 @@ if __name__ == "__main__":
     # Print the matrices
     for i in range(4):
         if rank == i and rank % 2 == 0:
-            print(f"\nM1: {localmat}")
+            print(f"\nM1: {rank}{localmat} | ")
         elif rank == i:
-            print(f" {localmat}")
+            print(f" {rank}{localmat}")
     
     for i in range(4, 8):
         if rank == i and rank % 2 == 0:
-            print(f"\nM2: {localmat}")
+            print(f"\nM2: {rank}{localmat} | ")
         elif rank == i:
-            print(f" {localmat}")
+            print(f" {rank}{localmat}")
 
     comm.Barrier()
 
