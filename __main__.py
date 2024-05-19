@@ -69,7 +69,10 @@ def startitall(localmat, mat_size, rank, comm):
             comm.send(temp, dest=(rank-2), tag=(rank-2))
 
     if rank in send_recv_pairs:
-        temp = temp + localmat  #This is where addition comes into play, this obviously don't work so....fix it
+        temp += localmat  #This is where addition comes into play, this obviously don't work so....fix it
+    
+    keys_list = list(send_recv_pairs.keys())
+    return temp, keys_list
 
 # Example usage:
 if __name__ == "__main__":
@@ -79,6 +82,7 @@ if __name__ == "__main__":
 
     matrix_size = 8
     localmat = []
+    c_keys = []
 
     tb = 0
     if rank == 0:
@@ -106,4 +110,17 @@ if __name__ == "__main__":
 
     comm.Barrier()
 
-    startitall(localmat, matrix_size, rank, comm)
+    localmat, c_keys = startitall(localmat, matrix_size, rank, comm)
+    comm.Barrier()
+
+    if rank in c_keys:
+        if rank == 0:
+            print(f"\n\nC: \n")
+        for key in c_keys:
+            if rank == key:
+                print(f"{localmat}")
+                if key == 5:    # if this is the second key
+                    print("\n")     # print a newline character
+
+
+
