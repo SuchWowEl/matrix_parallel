@@ -33,18 +33,22 @@ def startitall(localmat, mat_size, rank, comm):
     if rank in send_recv_pairs:
         # Get the ranks to receive from and send to
         receive_from, send_to = send_recv_pairs[rank]
-        
-        # Receive the matrix from the rank we're supposed to receive from
-        temp = comm.recv(source=receive_from, tag=receive_from)
-        
-        # Perform the multiplication and add the result to temp
-        temp = multi(localmat, temp)
-        
-        # Send localmat to the rank we're supposed to send to
-        comm.send(localmat, dest=send_to, tag=rank)
 
-    # Wait for all processes to reach this point
+        if rank % 2 == 0:  # If the rank is even
+            # Send localmat to the rank we're supposed to send to
+            comm.send(localmat, dest=send_to, tag=rank)
+            # Receive the matrix from the rank we're supposed to receive from
+            temp = comm.recv(source=receive_from, tag=receive_from)
+        else:  # If the rank is odd
+            # Receive the matrix from the rank we're supposed to receive from
+            temp = comm.recv(source=receive_from, tag=receive_from)
+            # Send localmat to the rank we're supposed to send to
+            comm.send(localmat, dest=send_to, tag=rank)
+
+        # Perform the multiplication and add the result to temp
+        temp = multi(temp, localmat)
     comm.Barrier()
+
 
 
     # Phase 2: Combine partial results from the previous step
@@ -64,7 +68,7 @@ def startitall(localmat, mat_size, rank, comm):
         localmat = comm.recv(source=other_rank, tag=other_rank)
         
         # Add the received matrix to temp
-        temp += received_mat
+        temp += localmat
 
     # If the current process rank is a value in phase_2_pairs
     elif rank in phase_2_pairs.values():
