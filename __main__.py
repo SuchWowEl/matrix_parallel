@@ -40,8 +40,8 @@ def startitall(localmat, mat_size, rank, comm):
     phase_2_pairs = {
         0: 1,  # Process 0 needs to add results from process 1
         2: 3,  # Process 2 needs to add results from process 3
-        4: 5,  # Process 4 needs to add results from process 5
-        6: 7   # Process 6 needs to add results from process 7
+        4: 6,  # Process 4 needs to add results from process 5
+        5: 7   # Process 6 needs to add results from process 7
     }
 
     if rank in phase_2_pairs:
