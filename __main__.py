@@ -19,37 +19,60 @@ def startitall(localmat, mat_size, rank, comm):
 
     # Phase 1: Determine which submatrices each process needs to receive and perform multiplication
     send_recv_pairs = {
-        0: [4, 5],  # Process 0 needs B11 (4) and B12 (5)
-        1: [6, 7],  # Process 1 needs B21 (6) and B22 (7)
-        2: [4, 5],  # Process 2 needs B11 (4) and B12 (5)
-        3: [6, 7],  # Process 3 needs B21 (6) and B22 (7)
-        4: [0, 2],  # Process 4 needs A11 (0) and A21 (2)
-        5: [0, 2],  # Process 5 needs A11 (0) and A21 (2)
-        6: [1, 3],  # Process 6 needs A12 (1) and A22 (3)
-        7: [1, 3]   # Process 7 needs A12 (1) and A22 (3)
+        0: [4, 5],  # Process 0 receives from 4 and sends to 5
+        1: [6, 7],  # Process 1 receives from 6 and sends to 7
+        2: [4, 5],  # Process 2 receives from 4 and sends to 5
+        3: [6, 7],  # Process 3 receives from 6 and sends to 7
+        4: [0, 2],  # Process 4 receives from 0 and sends to 2
+        5: [0, 2],  # Process 5 receives from 0 and sends to 2
+        6: [1, 3],  # Process 6 receives from 1 and sends to 3
+        7: [1, 3]   # Process 7 receives from 1 and sends to 3
     }
 
-    for i in range(len(send_recv_pairs[rank])):
-        receive_from = send_recv_pairs[rank][i]
-        comm.send(localmat, dest=send_recv_pairs[rank][(i) % len(send_recv_pairs[rank])], tag=rank)
-        received_mat = comm.recv(source=receive_from, tag=receive_from)
-        temp += multi(localmat, received_mat)
+    # If the current rank has a pair in the dictionary
+    if rank in send_recv_pairs:
+        # Get the ranks to receive from and send to
+        receive_from, send_to = send_recv_pairs[rank]
+        
+        # Receive the matrix from the rank we're supposed to receive from
+        temp = comm.recv(source=receive_from, tag=receive_from)
+        
+        # Perform the multiplication and add the result to temp
+        temp = multi(localmat, temp)
+        
+        # Send localmat to the rank we're supposed to send to
+        comm.send(localmat, dest=send_to, tag=rank)
+
+    # Wait for all processes to reach this point
     comm.Barrier()
+
 
     # Phase 2: Combine partial results from the previous step
     phase_2_pairs = {
         0: 1,  # Process 0 needs to add results from process 1
         2: 3,  # Process 2 needs to add results from process 3
-        4: 6,  # Process 4 needs to add results from process 5
-        5: 7   # Process 6 needs to add results from process 7
+        4: 6,  # Process 4 needs to add results from process 6
+        5: 7   # Process 5 needs to add results from process 7
     }
 
+    # If the current process rank is a key in phase_2_pairs
     if rank in phase_2_pairs:
+        # Get the rank to receive from
         other_rank = phase_2_pairs[rank]
-        received_mat = comm.recv(source=other_rank, tag=other_rank)
+        
+        # Receive the matrix from the rank we're supposed to receive from
+        localmat = comm.recv(source=other_rank, tag=other_rank)
+        
+        # Add the received matrix to temp
         temp += received_mat
+
+    # If the current process rank is a value in phase_2_pairs
     elif rank in phase_2_pairs.values():
-        comm.send(temp, dest=list(phase_2_pairs.keys())[list(phase_2_pairs.values()).index(rank)], tag=rank)
+        # Get the rank to send to
+        send_to = list(phase_2_pairs.keys())[list(phase_2_pairs.values()).index(rank)]
+        
+        # Send temp to the rank we're supposed to send to
+        comm.send(temp, dest=send_to, tag=rank)
 
     return temp, list(phase_2_pairs.keys())
 
