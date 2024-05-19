@@ -16,63 +16,42 @@ def multi(a, b):
 def startitall(localmat, mat_size, rank, comm):
     loc_size = mat_size // 2
     temp = np.zeros((loc_size, loc_size), dtype=int)
-    # Mapping of processes to submatrices
-    # A11, A12, A21, A22, B11, B12, B21, B22
-    submat_mapping = {
-        0: "A11", 1: "A12", 2: "A21", 3: "A22",
-        4: "B11", 5: "B12", 6: "B21", 7: "B22"
-    }
 
-    # Determine which submatrices each process needs to receive
+    # Phase 1: Determine which submatrices each process needs to receive and perform multiplication
     send_recv_pairs = {
-        0: [4, 5],  # Process 0 needs B11 (4) and sends to (5) 
-        1: [6, 7],  # Process 1 needs B21 (6) and sends to (7) 
-        2: [5, 4],  # Process 2 needs B12 (5) and sends to (4) 
-        3: [7, 6],  # Process 3 needs B22 (7) and sends to (6) 
-        4: [2, 0],  # Process 4 needs A21 (2) and sends to (0) 
-        5: [0, 2],  # Process 5 needs A11 (0) and sends to (2) 
-        6: [3, 1],  # Process 6 needs A22 (3) and sends to (1) 
-        7: [1, 3]   # Process 7 needs A12 (1) and sends to (3) 
+        0: [4, 5],  # Process 0 needs B11 (4) and B12 (5)
+        1: [6, 7],  # Process 1 needs B21 (6) and B22 (7)
+        2: [4, 5],  # Process 2 needs B11 (4) and B12 (5)
+        3: [6, 7],  # Process 3 needs B21 (6) and B22 (7)
+        4: [0, 2],  # Process 4 needs A11 (0) and A21 (2)
+        5: [0, 2],  # Process 5 needs A11 (0) and A21 (2)
+        6: [1, 3],  # Process 6 needs A12 (1) and A22 (3)
+        7: [1, 3]   # Process 7 needs A12 (1) and A22 (3)
     }
 
-    submatrix_needed = send_recv_pairs[rank]
+    for i in range(len(send_recv_pairs[rank])):
+        receive_from = send_recv_pairs[rank][i]
+        comm.send(localmat, dest=send_recv_pairs[rank][(i + 1) % len(send_recv_pairs[rank])], tag=rank)
+        received_mat = comm.recv(source=receive_from, tag=receive_from)
+        temp += multi(localmat, received_mat)
+    comm.Barrier()
 
-    #Phase 1
-    for i in range(len(submatrix_needed)):
-        receive_from = submatrix_needed[i]  # Get the rank to receive from
-        send_to = submatrix_needed[(i + 1) % len(submatrix_needed)]  # Get the rank to send to
-        comm.send(localmat, dest=send_to, tag=rank) #Send processes' local matrix to where it needs to go
-        localmat = comm.recv(source=receive_from, tag=receive_from) #Get matrix needed for multiplication
-    comm.Barrier()
-    
-    temp = multi(localmat, temp) #Multiply matrices and save result in temp
-    comm.Barrier()
-    
-    #Phase 2
-    # Determine which submatrices each process needs to receive
-    send_recv_pairs = {
-        0: [1],  # Process 0 needs result from (1) 
-        5: [7],  # Process 5 needs result from (7)  
-        4: [6],  # Process 4 needs result from (6)  
-        2: [3],  # Process 2 needs result from (3) 
+    # Phase 2: Combine partial results from the previous step
+    phase_2_pairs = {
+        0: 1,  # Process 0 needs to add results from process 1
+        2: 3,  # Process 2 needs to add results from process 3
+        4: 5,  # Process 4 needs to add results from process 5
+        6: 7   # Process 6 needs to add results from process 7
     }
 
-    if rank < 4:
-        if rank % 2 == 0:   #Processes 0 and 2 receive from 1 and 3 respectively
-            localmat = comm.recv(source=(rank+1), tag=rank)
-        else:
-            comm.send(temp, dest=(rank-1), tag=(rank-1))
-    elif rank >= 4:
-        if rank == 4 or 5: #Processes 4 and 5 receive from 6 and 7 respectively
-            localmat = comm.recv(source=(rank+2), tag=rank)
-        else:
-            comm.send(temp, dest=(rank-2), tag=(rank-2))
+    if rank in phase_2_pairs:
+        other_rank = phase_2_pairs[rank]
+        received_mat = comm.recv(source=other_rank, tag=other_rank)
+        temp += received_mat
+    elif rank in phase_2_pairs.values():
+        comm.send(temp, dest=list(phase_2_pairs.keys())[list(phase_2_pairs.values()).index(rank)], tag=rank)
 
-    if rank in send_recv_pairs:
-        temp += localmat  #This is where addition comes into play, this obviously don't work so....fix it
-    
-    keys_list = list(send_recv_pairs.keys())
-    return temp, keys_list
+    return temp, list(phase_2_pairs.keys())
 
 # Example usage:
 if __name__ == "__main__":
@@ -80,47 +59,31 @@ if __name__ == "__main__":
     rank = comm.Get_rank()
     size = comm.Get_size()
 
-    matrix_size = 8
-    localmat = []
-    c_keys = []
+    if size != 8:
+        raise ValueError("This program requires exactly 8 MPI processes.")
 
-    tb = 0
-    if rank == 0:
-        tb = time.time()
+    matrix_size = 8
     localmat = populate_matrices(matrix_size, rank)
 
     comm.Barrier()  # Synchronize all processes
 
     if rank == 0:
-        ta = time.time()
-        print(f"time for submatrix generation: {ta-tb}")
-
-    # Print the matrices
-    for i in range(4):
-        if rank == i and rank % 2 == 0:
-            print(f"\nM1: {rank}{localmat} | ")
-        elif rank == i:
-            print(f" {rank}{localmat}")
-    
-    for i in range(4, 8):
-        if rank == i and rank % 2 == 0:
-            print(f"\nM2: {rank}{localmat} | ")
-        elif rank == i:
-            print(f" {rank}{localmat}")
-
-    comm.Barrier()
+        tb = time.time()
 
     localmat, c_keys = startitall(localmat, matrix_size, rank, comm)
     comm.Barrier()
 
+    if rank == 0:
+        ta = time.time()
+        print(f"time for submatrix generation: {ta-tb}")
+
     if rank in c_keys:
-        if rank == 0:
-            print(f"\n\nC: \n")
-        for key in c_keys:
-            if rank == key:
-                print(f"{localmat}")
-                if key == 5:    # if this is the second key
-                    print("\n")     # print a newline character
+        print(f"Process {rank} result: {localmat}")
 
+    comm.Barrier()
 
-
+    if rank == 0:
+        print("\nFinal Result Matrix C:")
+    for key in c_keys:
+        if rank == key:
+            print(f"Process {rank}: {localmat}")
