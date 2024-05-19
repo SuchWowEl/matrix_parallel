@@ -45,6 +45,7 @@ def startitall(localmat, mat_size, rank, comm):
             # Send localmat to the rank we're supposed to send to
             comm.send(localmat, dest=send_to, tag=rank)
 
+        print(f"This is process {rank}, my temp before multi is: {temp}")
         # Perform the multiplication and add the result to temp
         temp = multi(temp, localmat)
     comm.Barrier()
