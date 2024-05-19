@@ -36,11 +36,11 @@ def startitall(localmat, mat_size, rank, comm):
     }
 
     submatrix_needed = send_recv_pairs[rank]
-    receive_from = submatrix_needed[i]  # Get the rank to receive from
-    send_to = submatrix_needed[(i + 1) % len(submatrix_needed)]  # Get the rank to send to
 
     #Phase 1
     for i in range(len(submatrix_needed)):
+        receive_from = submatrix_needed[i]  # Get the rank to receive from
+        send_to = submatrix_needed[(i + 1) % len(submatrix_needed)]  # Get the rank to send to
         comm.send(localmat, dest=send_to, tag=rank) #Send processes' local matrix to where it needs to go
         localmat = comm.recv(source=receive_from, tag=receive_from) #Get matrix needed for multiplication
     comm.Barrier()
