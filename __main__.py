@@ -31,7 +31,7 @@ def startitall(localmat, mat_size, rank, comm):
 
     for i in range(len(send_recv_pairs[rank])):
         receive_from = send_recv_pairs[rank][i]
-        comm.send(localmat, dest=send_recv_pairs[rank][(i + 1) % len(send_recv_pairs[rank])], tag=rank)
+        comm.send(localmat, dest=send_recv_pairs[rank][(i) % len(send_recv_pairs[rank])], tag=rank)
         received_mat = comm.recv(source=receive_from, tag=receive_from)
         temp += multi(localmat, received_mat)
     comm.Barrier()
