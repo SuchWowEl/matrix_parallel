@@ -54,9 +54,9 @@ def startitall(localmat, mat_size, rank, comm):
     # Phase 2: Combine partial results from the previous step
     phase_2_pairs = {
         0: 1,  # Process 0 needs to add results from process 1
-        2: 3,  # Process 2 needs to add results from process 3
+        5: 7,  # Process 5 needs to add results from process 7 
         4: 6,  # Process 4 needs to add results from process 6
-        5: 7   # Process 5 needs to add results from process 7
+        2: 3  # Process 2 needs to add results from process 3
     }
 
     # If the current process rank is a key in phase_2_pairs
