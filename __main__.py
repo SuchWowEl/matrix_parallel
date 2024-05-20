@@ -95,7 +95,12 @@ if __name__ == "__main__":
     if size != 8:
         raise ValueError("This program requires exactly 8 MPI processes.")
 
-    matrix_size = 8
+    # 512 = ???
+    # 1024 = 0.5858025550842285
+    # 2048 = 15.199561357498169
+    # 4096 = 225.06619834899902
+    # 4096 = ???
+    matrix_size = 4
     localmat = populate_matrices(matrix_size, rank)
 
     comm.Barrier()  # Synchronize all processes
@@ -115,8 +120,36 @@ if __name__ == "__main__":
 
     comm.Barrier()
 
+    tc = time.time()
     if rank == 0:
         print("\nFinal Result Matrix C:")
+        print(f"time elapsed: {tc-tb}")
     for key in c_keys:
         if rank == key:
             print(f"Process {rank}: {localmat}")
+
+    # if rank == 2:
+    #     comm.send(localmat, dest=3, tag=2)
+    #     localmat = comm.recv(source=4,tag=4)
+    # elif rank == 3:
+    #     localmat = comm.recv(source=2,tag=2)
+    # elif rank == 4:
+    #     comm.send(localmat, dest=2,tag=4)
+    # elif rank == 5:
+    #     comm.send(localmat, dest=1,tag=5)
+    # elif rank == 1:
+    #     localmat = comm.recv(source=5,tag=5)
+
+    if rank in [1,3,6,7]:
+        # allocate space for "unifying" the matrix
+        del localmat
+
+    if rank == 0:
+        c12 = comm.recv(source=5,tag=5)
+        c21 = comm.recv(source=4,tag=4)
+        c22 = comm.recv(source=2,tag=2)
+        c_matrix = np.vstack((np.hstack((localmat, c12)), np.hstack((c21, c22))))
+        print(f"c matrix is: {c_matrix}")
+    elif rank in [2,4,5]:
+        comm.send(localmat,dest=0,tag=rank)
+        del localmat
