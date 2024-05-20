@@ -46,8 +46,13 @@ def startitall(localmat, mat_size, rank, comm):
             comm.send(localmat, dest=send_to, tag=rank)
 
         print(f"This is process {rank}, my temp before multi is: {temp}")
-        # Perform the multiplication and add the result to temp
-        temp = multi(temp, localmat)
+
+        if rank < 4:
+            # Perform the multiplication and add the result to temp
+            temp = multi(localmat, temp)
+        else:
+            # Perform the multiplication and add the result to temp, switch values if rank is greater than 3
+            temp = multi(temp, localmat)
     comm.Barrier()
 
     print(f"\n\nThis is process {rank}, and my multi result is: {temp}")
