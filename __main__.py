@@ -89,7 +89,7 @@ def startitall(localmat, mat_size, rank, comm):
         # Send temp to the rank we're supposed to send to
         comm.send(temp, dest=send_to, tag=rank)
 
-    return temp, list(phase_2_pairs.keys())
+    return temp
 
 # Example usage:
 if __name__ == "__main__":
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     if rank == 0:
         tb = time.time()
 
-    localmat, c_keys = startitall(localmat, matrix_size, rank, comm)
+    localmat = startitall(localmat, matrix_size, rank, comm)
     comm.Barrier()
 
     if rank == 0:
