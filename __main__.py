@@ -19,14 +19,18 @@ def startitall(localmat, mat_size, rank, comm):
 
     # Phase 1: Determine which submatrices each process needs to receive and perform multiplication
     send_recv_pairs = {
-        0: [4, 5],  # Process 0 receives from 4 and sends to 5
-        1: [6, 7],  # Process 1 receives from 6 and sends to 7
-        2: [5, 4],  # Process 2 receives from 5 and sends to 4
-        3: [7, 6],  # Process 3 receives from 7 and sends to 6
-        4: [2, 0],  # Process 4 receives from 2 and sends to 0
-        5: [0, 2],  # Process 5 receives from 0 and sends to 2
-        6: [3, 1],  # Process 6 receives from 3 and sends to 1
-        7: [1, 3]   # Process 7 receives from 1 and sends to 3
+        # A
+        0: [4, 5],  # Process 0 receives from 4 and sends to 5. 0(4) or A11(B11)
+        1: [6, 7],  # Process 1 receives from 6 and sends to 7. 1(6) or A12(B21)
+        2: [5, 4],  # Process 2 receives from 5 and sends to 4. 2(5) or A21(B12)
+        3: [7, 6],  # Process 3 receives from 7 and sends to 6. 3(7) or A22(B22)
+
+        # B. Since we're computing for AB and not BA, values are switched during multiplication
+        # for processes 4 to 7. So that instead of BA(localmatxtemp), it's AB(tempxlocalmat). Refer to line 57
+        4: [2, 0],  # Process 4 receives from 2 and sends to 0. 4(2) or B11(A21)
+        5: [0, 2],  # Process 5 receives from 0 and sends to 2. 5(0) or B12(A11)
+        6: [3, 1],  # Process 6 receives from 3 and sends to 1. 6(3) or B21(A22)
+        7: [1, 3]   # Process 7 receives from 1 and sends to 3. 7(1) or B22(A12)
     }
 
     # If the current rank has a pair in the dictionary
@@ -48,10 +52,10 @@ def startitall(localmat, mat_size, rank, comm):
         print(f"This is process {rank}, my temp before multi is: {temp}")
 
         if rank < 4:
-            # Perform the multiplication and add the result to temp
+            # Perform the multiplication and add the result to temp, reusing it to save space
             temp = multi(localmat, temp)
         else:
-            # Perform the multiplication and add the result to temp, switch values if rank is greater than 3
+            # Perform the multiplication and add the result to temp, switch values if rank is greater than 3. Since BA is not the same as AB
             temp = multi(temp, localmat)
     comm.Barrier()
 
@@ -59,10 +63,11 @@ def startitall(localmat, mat_size, rank, comm):
 
     # Phase 2: Combine partial results from the previous step
     phase_2_pairs = {
-        0: 1,  # Process 0 needs to add results from process 1
-        5: 7,  # Process 5 needs to add results from process 7 
-        4: 6,  # Process 4 needs to add results from process 6
-        2: 3  # Process 2 needs to add results from process 3
+        # C
+        0: 1,  # Process 0 needs to add results from process 1. This is C11
+        5: 7,  # Process 5 needs to add results from process 7. This is C12
+        4: 6,  # Process 4 needs to add results from process 6. This is C21
+        2: 3   # Process 2 needs to add results from process 3. This is C22
     }
 
     # If the current process rank is a key in phase_2_pairs
@@ -70,7 +75,7 @@ def startitall(localmat, mat_size, rank, comm):
         # Get the rank to receive from
         other_rank = phase_2_pairs[rank]
         
-        # Receive the matrix from the rank we're supposed to receive from
+        # Receive the matrix from the rank we're supposed to receive from into localmat, since the values inside it are no longer needed for the addition
         localmat = comm.recv(source=other_rank, tag=other_rank)
         
         # Add the received matrix to temp
@@ -101,7 +106,11 @@ if __name__ == "__main__":
     # 4096 = 225.06619834899902
     # 4096 = ???
     matrix_size = 4
-    localmat = populate_matrices(matrix_size, rank)
+    localmat = populate_matrices(matrix_size, rank) # Each process creates their own local matrix named localmat
+    """
+    For convention, the matrix A is made up of the matrices from processes 0 to 3. Essentially, process 0 has A11, 1 has A12
+    2 has A21, and process 3 has A22. Similarly, the matrix B is divided among processes 4 to 7.
+    """
 
     comm.Barrier()  # Synchronize all processes
 
