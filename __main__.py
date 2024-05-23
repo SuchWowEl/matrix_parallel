@@ -104,7 +104,7 @@ if __name__ == "__main__":
     # 1024 = 0.5858025550842285
     # 2048 = 15.199561357498169
     # 4096 = 225.06619834899902
-    # 4096 = ???
+    # 8192 = 1877.4816830158234
     matrix_size = 4
     localmat = populate_matrices(matrix_size, rank) # Each process creates their own local matrix named localmat
     """
