@@ -124,30 +124,12 @@ if __name__ == "__main__":
         ta = time.time()
         print(f"time for submatrix generation: {ta-tb}")
 
-    if rank in c_keys:
-        print(f"Process {rank} result: {localmat}")
-
     comm.Barrier()
 
     tc = time.time()
     if rank == 0:
         print("\nFinal Result Matrix C:")
         print(f"time elapsed: {tc-tb}")
-    for key in c_keys:
-        if rank == key:
-            print(f"Process {rank}: {localmat}")
-
-    # if rank == 2:
-    #     comm.send(localmat, dest=3, tag=2)
-    #     localmat = comm.recv(source=4,tag=4)
-    # elif rank == 3:
-    #     localmat = comm.recv(source=2,tag=2)
-    # elif rank == 4:
-    #     comm.send(localmat, dest=2,tag=4)
-    # elif rank == 5:
-    #     comm.send(localmat, dest=1,tag=5)
-    # elif rank == 1:
-    #     localmat = comm.recv(source=5,tag=5)
 
     if rank in [1,3,6,7]:
         # NOTE: deallocating unused memory, since only processes
