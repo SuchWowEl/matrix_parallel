@@ -100,7 +100,9 @@ if __name__ == "__main__":
     if size != 8:
         raise ValueError("This program requires exactly 8 MPI processes.")
 
-    # 512 = ???
+    # NOTE:
+    # runtime (el):
+    # 512 = 0.07595205307006836
     # 1024 = 0.5858025550842285
     # 2048 = 15.199561357498169
     # 4096 = 225.06619834899902
