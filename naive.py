@@ -11,6 +11,8 @@ def multiply(A, B, C):
             for k in range(n):
                 C[i][j] += A[i][k]*B[k][j]
 
+def pmultiply(A, B, C):
+    C = np.matmul(A,B)
 # this code is contributed by shivanisinghss2110
 
 a = np.random.randint(0, 11, size=(size, size))
@@ -18,7 +20,7 @@ b = np.random.randint(0, 11, size=(size, size))
 c = np.zeros((size, size), dtype=int)
 
 ta = time.time()
-multiply(a,b,c)
+pmultiply(a,b,c)
 tb = time.time()
 
 print(f"time elapsed: {tb-ta}")
