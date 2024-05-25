@@ -126,8 +126,6 @@ if __name__ == "__main__":
         ta = time.time()
         print(f"time for submatrix generation: {ta-tb}")
 
-    comm.Barrier()
-
     tc = time.time()
     if rank == 0:
         print("\nFinal Result Matrix C:")
