@@ -117,20 +117,17 @@ if __name__ == "__main__":
     comm.Barrier()  # Synchronize all processes
 
     if rank == 0:
-        tb = time.time()
+        ta = time.time()
 
     localmat = startitall(localmat, matrix_size, rank, comm)
     comm.Barrier()
 
     if rank == 0:
-        ta = time.time()
-        print(f"time for submatrix generation: {ta-tb}")
-
-    tc = time.time()
-    if rank == 0:
+        tb = time.time()
+        print(f"time elapsed: {ta-tb}")
         print("\nFinal Result Matrix C:")
-        print(f"time elapsed: {tc-tb}")
 
+    # c_submatrices lists the processes and their corresponding placement in the matrix C, or the product matrix.
     c_submatrices = {
         0: "C11",
         2: "C22",
