@@ -133,20 +133,11 @@ if __name__ == "__main__":
         print("\nFinal Result Matrix C:")
         print(f"time elapsed: {tc-tb}")
 
-    if rank in [1,3,6,7]:
-        # NOTE: deallocating unused memory, since only processes
-        # 0,2,4,5 store the values for the product matrix
-        del localmat
-
-    if rank == 0:
-        # NOTE: process 0 collects all values accordingly
-        c12 = comm.recv(source=5,tag=5)
-        c21 = comm.recv(source=4,tag=4)
-        c22 = comm.recv(source=2,tag=2)
-        c_matrix = np.vstack((np.hstack((localmat, c12)), np.hstack((c21, c22))))
-        print(f"c matrix is: {c_matrix}")
-    elif rank in [2,4,5]:
-        # NOTE: send first the data to 0
-        # before deallocating the memory used
-        comm.send(localmat,dest=0,tag=rank)
-        del localmat
+    c_submatrices = {
+        0: "C11",
+        2: "C22",
+        4: "C21",
+        5: "C12",
+    }
+    if rank in c_submatrices.keys():
+        print(f"{c_submatrices[rank]}: {localmat}")
