@@ -1,7 +1,13 @@
 import numpy as np
 import time
 
-size = 128
+# NOTE:
+# pmultiply runtime:
+# 256 = 0.044034481048583984
+# 512 = 0.434398889541626
+# 1024 = 4.980994701385498
+# 2048 = 70.91712617874146
+size = 2048
 
 def multiply(A, B, C):
     n = size
