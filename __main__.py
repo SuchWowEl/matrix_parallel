@@ -107,7 +107,7 @@ if __name__ == "__main__":
     # 2048 = 15.199561357498169
     # 4096 = 225.06619834899902
     # 8192 = 1877.4816830158234
-    matrix_size = 4
+    matrix_size = 8192
     localmat = populate_matrices(matrix_size, rank) # Each process creates their own local matrix named localmat
     """
     For convention, the matrix A is made up of the matrices from processes 0 to 3. Essentially, process 0 has A11, 1 has A12

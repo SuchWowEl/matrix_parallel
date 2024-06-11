@@ -10,4 +10,8 @@ $ pipenv install
 # To execute
 Activate the `venv` as stated in step 2, then
 
-`$ mpiexec -n 4 python __main__.py`
+`$ mpiexec -n 8 python __main__.py`
+
+or
+
+`$ mpiexec --use-hwthread-cpus -n 8 python __main__.py`
